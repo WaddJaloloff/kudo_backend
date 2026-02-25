@@ -36,7 +36,7 @@ def start(message):
     if user and user.telefon_raqam:
         logging.info("User has phone number, skipping phone request")
         user_states[message.chat.id] = {"step": "id"}
-        bot.send_message(message.chat.id, "🔎 Mahsulot ID sini kiriting:")
+        bot.send_message(message.chat.id, "🔎 Mahsulot ID sini kiriting:\n\nBekor qilish: /cancel")
     else:
         logging.info("User has no phone number, requesting phone")
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -46,6 +46,23 @@ def start(message):
             message.chat.id,
             "Assalomu alaykum 👋\nMahsulotni tekshirish uchun telefon raqamingizni yuboring:",
             reply_markup=markup
+        )
+
+# /cancel handler
+@bot.message_handler(commands=['cancel'])
+def cancel(message):
+    if message.chat.id in user_states:
+        user_states.pop(message.chat.id)
+        bot.send_message(
+            message.chat.id,
+            "❌ Jarayon bekor qilindi. /start komandasi orqali qayta boshlashingiz mumkin.",
+            reply_markup=types.ReplyKeyboardRemove()
+        )
+        logging.info(f"User {message.from_user.id} canceled the process")
+    else:
+        bot.send_message(
+            message.chat.id,
+            "⚠️ Sizda hozir hech qanday jarayon yo'q."
         )
 
 # Telefon raqam handler
@@ -75,7 +92,9 @@ def get_phone(message):
     )
 
     user_states[message.chat.id] = {"step": "id"}
-    bot.send_message(message.chat.id, "🔎 Endi mahsulot ID sini kiriting:")
+    bot.send_message(message.chat.id, "🔎 Endi mahsulot ID sini kiriting:\n\nBekor qilish: /cancel")
+
+
 
 # Mahsulot ID handler
 @bot.message_handler(func=lambda m: user_states.get(m.chat.id, {}).get("step") == "id")
@@ -86,7 +105,7 @@ def get_id(message):
         "id": message.text.strip()
     }
 
-    bot.send_message(message.chat.id, "🔐 6 xonali kodni kiriting:")
+    bot.send_message(message.chat.id, "🔐 6 xonali kodni kiriting:\n\nBekor qilish: /cancel")
 
 # Mahsulot kod handler
 @bot.message_handler(func=lambda m: user_states.get(m.chat.id, {}).get("step") == "code")
@@ -172,7 +191,7 @@ def get_code(message):
 
         bot.send_message(
             message.chat.id,
-            "🔎 Yana tekshirib ko'rishimiz mumkin, IDni kiriting:"
+            "🔎 Yana tekshirib ko'rishimiz mumkin, IDni kiriting:\n\nBekor qilish: /cancel"
         )
             
         user_states[message.chat.id] = {"step": "id"}
@@ -187,7 +206,7 @@ def get_code(message):
 def retry(call):
     logging.info(f"Retry pressed by {call.from_user.id}")
     user_states[call.message.chat.id] = {"step": "id"}
-    bot.send_message(call.message.chat.id, "ID ni qaytadan kiriting:")
+    bot.send_message(call.message.chat.id, "ID ni qaytadan kiriting:\n\nBekor qilish: /cancel")
 
 # Admin /send command
 @bot.message_handler(commands=['send'])
