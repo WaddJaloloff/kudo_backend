@@ -1,4 +1,4 @@
-from json import load
+from dotenv import load_dotenv
 import os
 import telebot
 from telebot import types
@@ -7,7 +7,7 @@ from telebot.types import InputMediaPhoto
 import django
 from django.utils import timezone
 import logging
-load.env()  # .env faylidan o'zgaruvchilarni yuklash
+load_dotenv()  #env faylidan o'zgaruvchilarni yuklash
 
 # Loyihaning root folderini path ga qo‘shish
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -21,7 +21,9 @@ from core.models import TelegramFoydalanuvchi, TasdiqlovchiKod
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 ADMIN_ID = 6565325969  # admin telegram id
-bot = telebot.TeleBot(os.getenv("BOT_TOKEN"), parse_mode="HTML")
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+bot = telebot.TeleBot(BOT_TOKEN, parse_mode="HTML")
 
 user_states = {}
 
