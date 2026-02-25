@@ -13,12 +13,17 @@ class Kategoriya(models.Model):
     def __str__(self):
         return self.nomi
 
+    class Meta:
+        verbose_name = "Kategoriya "
+        verbose_name_plural = "Kategoriyalar "
+        
+
 class Mahsulot(models.Model):
     
     kategoriyalar = models.ManyToManyField(
         Kategoriya,
         related_name="mahsulotlar",
-        verbose_name="Kategoriyalar"
+        verbose_name="Kategoriyalar "
     )
 
     nomi = models.CharField("Nomi", max_length=200)
@@ -28,12 +33,16 @@ class Mahsulot(models.Model):
     def __str__(self):
         return self.nomi
 
+    class Meta:
+        verbose_name = "Mahsulot "
+        verbose_name_plural = "Mahsulotlar "
+
 class MahsulotRasmi(models.Model):
     mahsulot = models.ForeignKey(
         Mahsulot,
         on_delete=models.CASCADE,
         related_name="rasmlar",
-        verbose_name="Mahsulot"
+        verbose_name="Mahsulot "
     )
 
     rasm = models.ImageField("Rasm", upload_to="products/")
@@ -42,18 +51,26 @@ class MahsulotRasmi(models.Model):
 
     def __str__(self):
         return f"{self.mahsulot.nomi} rasmi"
+    
+    class Meta:
+        verbose_name = "Mahsulot rasmi "
+        verbose_name_plural = "Mahsulot rasmlari "
 
 class MahsulotXususiyati(models.Model):
     mahsulot = models.ForeignKey(
         Mahsulot,
         on_delete=models.CASCADE,
         related_name="xususiyatlar",
-        verbose_name="Mahsulot"
+        verbose_name="Mahsulot "
     )
     sarlavha = models.CharField("Sarlavha", max_length=200)
 
     def __str__(self):
         return f"{self.mahsulot.nomi} - {self.sarlavha}"
+
+    class Meta:
+        verbose_name = "Mahsulot xususiyati "
+        verbose_name_plural = "Mahsulot xususiyatlari "
 
 
 class TelegramFoydalanuvchi(models.Model):
@@ -65,6 +82,10 @@ class TelegramFoydalanuvchi(models.Model):
     def __str__(self):
         return f"{self.telegram_id} - {self.telefon_raqam}"
 
+    class Meta:
+        verbose_name = "Telegram foydalanuvchisi "
+        verbose_name_plural = "Telegram foydalanuvchilar "
+
 
 class TasdiqlovchiSet(models.Model):
     mahsulot = models.ForeignKey(
@@ -73,8 +94,12 @@ class TasdiqlovchiSet(models.Model):
         verbose_name="Mahsulot"
     )
 
-    soni = models.IntegerField("Nechta kod chiqarish kerak")
+    soni = models.IntegerField("Etiketka soni")
     yaratilgan_vaqti = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Etiketka "
+        verbose_name_plural = "Etiketkalar "
 
 
 
@@ -100,3 +125,7 @@ class TasdiqlovchiKod(models.Model):
 
     def __str__(self):
         return f"{self.id} - {self.code}"
+
+    class Meta:
+        verbose_name = "Etiketka kod "
+        verbose_name_plural = "Etiketka kodlari "
