@@ -75,7 +75,7 @@ class MahsulotAdmin(admin.ModelAdmin):
 
     def get_avtomobillar(self, obj):
         return ", ".join(a.nomi for a in obj.avtomobillar.all())
-    get_avtomobillar.short_description = "Mos avtomobillar"
+    get_avtomobillar.short_description = "Avtomobillar"
 
     def rasm_preview(self, obj):
         rasm = obj.rasmlar.filter(asosiy=True).first() or obj.rasmlar.first()
