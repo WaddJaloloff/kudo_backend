@@ -1,5 +1,8 @@
 /venv
 .env
+/media
+deploy.sh
+
 
 db.sqlite3
 __pycache__/

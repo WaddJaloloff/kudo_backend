@@ -6,24 +6,46 @@ from django.db import models
 
 
 
-class Kategoriya(models.Model):
-    nomi = models.CharField("Nomi", max_length=150)
+class Avtomobil(models.Model):
+    nomi = models.CharField("Avtomobil nomi", max_length=150)
     slug = models.SlugField("URL nomi", unique=True)
 
     def __str__(self):
         return self.nomi
 
     class Meta:
-        verbose_name = "Kategoriya "
-        verbose_name_plural = "Kategoriyalar "
+        verbose_name = "Avtomobil"
+        verbose_name_plural = "Avtomobillar"
+
+class MahsulotKategoriya(models.Model):
+    nomi = models.CharField("Kategoriya nomi", max_length=150)
+    slug = models.SlugField("URL nomi", unique=True)
+
+    def __str__(self):
+        return self.nomi
+
+    class Meta:
+        verbose_name = "Mahsulot kategoriyasi"
+        verbose_name_plural = "Mahsulot kategoriyalari"
         
 
 class Mahsulot(models.Model):
-    
-    kategoriyalar = models.ManyToManyField(
-        Kategoriya,
+
+    # ❗ MAJBURIY: mahsulot turi (amortizator, moy...)
+    mahsulot_kategoriyasi = models.ForeignKey(
+        MahsulotKategoriya,
+        on_delete=models.PROTECT,
+        verbose_name="Mahsulot kategoriyasi",
+        null=True,    # vaqtincha
+        blank=True
+    )
+
+    # ❗ KO‘P avtomobilga mos
+    avtomobillar = models.ManyToManyField(
+        Avtomobil,
         related_name="mahsulotlar",
-        verbose_name="Kategoriyalar "
+        verbose_name="Avtomobillar",
+        blank=True
     )
 
     nomi = models.CharField("Nomi", max_length=200)
@@ -32,11 +54,7 @@ class Mahsulot(models.Model):
 
     def __str__(self):
         return self.nomi
-
-    class Meta:
-        verbose_name = "Mahsulot "
-        verbose_name_plural = "Mahsulotlar "
-
+    
 class MahsulotRasmi(models.Model):
     mahsulot = models.ForeignKey(
         Mahsulot,
