@@ -18,7 +18,7 @@ import random
 # 🚗 Avtomobil admin (oldingi Kategoriya)
 @admin.register(Avtomobil)
 class AvtomobilAdmin(admin.ModelAdmin):
-    list_display = ('nomi', 'slug')
+    list_display = ('id', 'nomi', 'slug')
     prepopulated_fields = {'slug': ('nomi',)}
     search_fields = ('nomi',)
 
@@ -26,7 +26,7 @@ class AvtomobilAdmin(admin.ModelAdmin):
 # 🧩 Mahsulot kategoriyasi admin
 @admin.register(MahsulotKategoriya)
 class MahsulotKategoriyaAdmin(admin.ModelAdmin):
-    list_display = ('nomi', 'slug')
+    list_display = ('id', 'nomi', 'slug')
     prepopulated_fields = {'slug': ('nomi',)}
     search_fields = ('nomi',)
 
@@ -46,7 +46,13 @@ class MahsulotRasmiInline(admin.TabularInline):
 # 📦 Mahsulot admin
 @admin.register(Mahsulot)
 class MahsulotAdmin(admin.ModelAdmin):
+    def add_view(self, request, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['title'] = "Yangi mahsulot"
+        return super().add_view(request, form_url, extra_context)
+    
     list_display = (
+        'id',
         'nomi',
         'mahsulot_kategoriyasi',
         'get_avtomobillar',
