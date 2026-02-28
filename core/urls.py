@@ -9,7 +9,7 @@ from .views import (
 router = DefaultRouter()
 router.register(r'avtomobillar', AvtomobilViewSet, basename='avtomobil')
 router.register(r'mahsulot-kategoriyalar', MahsulotKategoriyaViewSet, basename='mahsulot-kategoriya')
-router.register(r'mahsulotlar', MahsulotViewSet, basename='mahsulot')
+router.register(r'products', MahsulotViewSet, basename='mahsulot')
 
 urlpatterns = [
     path('', include(router.urls)),
