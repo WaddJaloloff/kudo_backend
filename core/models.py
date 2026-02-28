@@ -25,8 +25,8 @@ class MahsulotKategoriya(models.Model):
         return self.nomi
 
     class Meta:
-        verbose_name = "Mahsulot kategoriyasi"
-        verbose_name_plural = "Mahsulot kategoriyalari"
+        verbose_name = "Kategoriyasi"
+        verbose_name_plural = "Kategoriyalari"
         
 
 class Mahsulot(models.Model):
@@ -35,7 +35,7 @@ class Mahsulot(models.Model):
     mahsulot_kategoriyasi = models.ForeignKey(
         MahsulotKategoriya,
         on_delete=models.PROTECT,
-        verbose_name="Mahsulot kategoriyasi",
+        verbose_name="Kategoriyasi",
         null=True,    # vaqtincha
         blank=True
     )
