@@ -1,42 +1,39 @@
 from rest_framework import viewsets
-from openpyxl import Workbook
-from .models import TasdiqlovchiSet
-from django.http import HttpResponse
-from .models import Kategoriya, Mahsulot
-from .serializers import KategoriyaSerializer, MahsulotSerializer
+from .models import Mahsulot, Avtomobil, MahsulotKategoriya
+from .serializers import (
+    MahsulotSerializer,
+    AvtomobilSerializer,
+    MahsulotKategoriyaSerializer
+)
 
 
-class KategoriyaViewSet(viewsets.ModelViewSet):
-    queryset = Kategoriya.objects.all()
-    serializer_class = KategoriyaSerializer
+class AvtomobilViewSet(viewsets.ModelViewSet):
+    queryset = Avtomobil.objects.all()
+    serializer_class = AvtomobilSerializer
+
+
+class MahsulotKategoriyaViewSet(viewsets.ModelViewSet):
+    queryset = MahsulotKategoriya.objects.all()
+    serializer_class = MahsulotKategoriyaSerializer
 
 
 class MahsulotViewSet(viewsets.ModelViewSet):
-    queryset = Mahsulot.objects.all().prefetch_related(
-        'rasmlar',
-        'kategoriyalar',
-        'xususiyatlar'
-    )
     serializer_class = MahsulotSerializer
 
+    def get_queryset(self):
+        qs = Mahsulot.objects.all().prefetch_related(
+            "rasmlar",
+            "xususiyatlar",
+            "avtomobillar"
+        ).select_related("mahsulot_kategoriyasi")
 
+        avtomobil = self.request.query_params.get("avtomobil")
+        kategoriya = self.request.query_params.get("kategoriya")
 
-def export_excel(request, set_id):
-    tasdiqlovchi_set = TasdiqlovchiSet.objects.get(id=set_id)
-    kodlar = tasdiqlovchi_set.kodlar.all()
+        if avtomobil:
+            qs = qs.filter(avtomobillar__slug=avtomobil)
 
-    wb = Workbook()
-    ws = wb.active
+        if kategoriya:
+            qs = qs.filter(mahsulot_kategoriyasi__slug=kategoriya)
 
-    ws.append(["ID", "CODE"])
-
-    for kod in kodlar:
-        ws.append([kod.unique_id, kod.code])
-
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
-    response['Content-Disposition'] = f'attachment; filename=kodlar_{set_id}.xlsx'
-
-    wb.save(response)
-    return response
+        return qs.distinct()

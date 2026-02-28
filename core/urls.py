@@ -1,13 +1,16 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from .views import export_excel
-from .views import KategoriyaViewSet, MahsulotViewSet
+from .views import (
+    MahsulotViewSet,
+    AvtomobilViewSet,
+    MahsulotKategoriyaViewSet,
+)
 
 router = DefaultRouter()
-router.register(r'categories', KategoriyaViewSet)
-router.register(r'products', MahsulotViewSet)
+router.register(r'avtomobillar', AvtomobilViewSet, basename='avtomobil')
+router.register(r'mahsulot-kategoriyalar', MahsulotKategoriyaViewSet, basename='mahsulot-kategoriya')
+router.register(r'mahsulotlar', MahsulotViewSet, basename='mahsulot')
 
 urlpatterns = [
-    path('export_excel/<int:set_id>/', export_excel, name='export_excel'),
     path('', include(router.urls)),
 ]
