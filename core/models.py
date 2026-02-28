@@ -25,8 +25,8 @@ class MahsulotKategoriya(models.Model):
         return self.nomi
 
     class Meta:
-        verbose_name = "Kategoriyasi"
-        verbose_name_plural = "Kategoriyalari"
+        verbose_name = "Kategoriyasi "
+        verbose_name_plural = "Kategoriyalari "
         
 
 class Mahsulot(models.Model):
@@ -35,7 +35,7 @@ class Mahsulot(models.Model):
     mahsulot_kategoriyasi = models.ForeignKey(
         MahsulotKategoriya,
         on_delete=models.PROTECT,
-        verbose_name="Kategoriyasi",
+        verbose_name="Kategoriyasi ",
         null=True,    # vaqtincha
         blank=True
     )
@@ -43,8 +43,8 @@ class Mahsulot(models.Model):
     # ❗ KO‘P avtomobilga mos
     avtomobillar = models.ManyToManyField(
         Avtomobil,
-        related_name="Mahsulotlar ",
-        verbose_name="Avtomobillar",
+        related_name="mahsulotlar",
+        verbose_name="Avtomobillar ",
         blank=True
     )
 
@@ -54,12 +54,15 @@ class Mahsulot(models.Model):
 
     def __str__(self):
         return self.nomi
+    class Meta:
+        verbose_name = "Mahsulot "
+        verbose_name_plural = "Mahsulotlar "
     
 class MahsulotRasmi(models.Model):
     mahsulot = models.ForeignKey(
         Mahsulot,
         on_delete=models.CASCADE,
-        related_name="Rasmlar ",
+        related_name="rasmlar",
         verbose_name="Mahsulot "
     )
 
@@ -78,7 +81,7 @@ class MahsulotXususiyati(models.Model):
     mahsulot = models.ForeignKey(
         Mahsulot,
         on_delete=models.CASCADE,
-        related_name="Xususiyatlar ",
+        related_name="xususiyatlar",
         verbose_name="Mahsulot "
     )
     sarlavha = models.CharField("Sarlavha", max_length=200)
@@ -125,7 +128,7 @@ class TasdiqlovchiKod(models.Model):
     tasdiqlovchi_set = models.ForeignKey(
         TasdiqlovchiSet,
         on_delete=models.CASCADE,
-        related_name="Kodlar "
+        related_name="kodlar"
     )
 
     code = models.CharField(max_length=6)
