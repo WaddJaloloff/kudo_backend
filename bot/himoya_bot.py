@@ -114,8 +114,7 @@ def get_code(message):
     logging.info(f"Code received from {message.from_user.id}: {code}")
 
     try:
-        # 6 xonali kodni bazadan topamiz, faqat ishlatilmagan kodlar orasidan
-        kod = TasdiqlovchiKod.objects.select_related('tasdiqlovchi_set__mahsulot').get(
+        kod = TasdiqlovchiKod.objects.get(
             code=code,
             ishlatilgan=False
         )
@@ -124,49 +123,18 @@ def get_code(message):
             telegram_id=message.from_user.id
         )
 
-        # Kodni ishlatildi deb belgilaymiz
         kod.ishlatilgan = True
         kod.tekshirgan_user = user
         kod.tekshirilgan_vaqti = timezone.now()
         kod.save()
-        logging.info(f"Code validated successfully: {code}")
 
-        # Mahsulotni olamiz
-        mahsulot = kod.tasdiqlovchi_set.mahsulot
-
-        # Asosiy rasm va xususiyatlar
-        asosiy_rasm = mahsulot.rasmlar.filter(asosiy=True).first() or mahsulot.rasmlar.first()
-        xususiyatlar = "\n".join([f"• {x.sarlavha}" for x in mahsulot.xususiyatlar.all()]) or "Hozircha bo'sh"
-
-        caption_text = (
-            f"<b>Nomi:</b> {mahsulot.nomi}\n"
-            f"<b>Tavsif:</b> {mahsulot.tavsifi}\n\n"
-            f"<b>Xususiyatlar:</b>\n{xususiyatlar}"
-        )
-
-        # Inline tugma: qayta tekshirish
         markup = types.InlineKeyboardMarkup()
-        btn = types.InlineKeyboardButton("🔄 Boshqa mahsulotlarni tekshirish", callback_data="retry")
+        btn = types.InlineKeyboardButton(
+            "🔄 Boshqa kodni tekshirish",
+            callback_data="retry"
+        )
         markup.add(btn)
 
-        # Rasm bilan yuborish
-        if asosiy_rasm and os.path.exists(asosiy_rasm.rasm.path):
-            with open(asosiy_rasm.rasm.path, 'rb') as f:
-                bot.send_photo(
-                    message.chat.id,
-                    photo=f,
-                    caption=caption_text
-                    
-                )
-        else:
-            # Agar rasm yo'q bo'lsa, matn va tugma
-            bot.send_message(
-                message.chat.id,
-                text=caption_text
-                
-            )
-
-        # Mahsulot original yozuvi alohida xabar sifatida
         bot.send_message(
             message.chat.id,
             "✅ <b>Bu mahsulot original!</b>",
@@ -174,30 +142,26 @@ def get_code(message):
         )
 
     except TasdiqlovchiKod.DoesNotExist:
-        logging.error(f"Code not found or already used: {code}")
-        # Inline tugma yo'q, avtomatik ID so'raymiz
+
         if TasdiqlovchiKod.objects.filter(code=code).exists():
-            # Kod mavjud, faqat ishlatilgan
             bot.send_message(
                 message.chat.id,
-                "❌ Bu mahsulot avval bot orqali tekshirilgan, agar siz tekshirmagan bo'lsangiz - bu mahsulot sohta"
+                "❌ Bu kod avval tekshirilgan.\nAgar siz tekshirmagan bo'lsangiz mahsulot soxta."
             )
         else:
-            # Kod bazada yo'q
             bot.send_message(
                 message.chat.id,
-                "❌ Bu mahsulot sohta yoki ID va codeni tog'ri ekanligiga ishonch hosil qiling!"
+                "❌ Bu mahsulot soxta yoki kod noto‘g‘ri."
             )
 
         bot.send_message(
             message.chat.id,
-            "🔎 Yana tekshirib ko'rishimiz mumkin, IDni kiriting:\n\nBekor qilish: /cancel"
+            "🔎 Yana tekshirib ko‘rish uchun ID kiriting:\n\nBekor qilish: /cancel"
         )
-            
+
         user_states[message.chat.id] = {"step": "id"}
 
     else:
-        # Mahsulot topilganda, user_state ni tozalaymiz
         user_states.pop(message.chat.id, None)
 
 

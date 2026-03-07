@@ -1,9 +1,14 @@
-/venv
+# virtual environment
+venv/
 .env
-/media
-deploy.sh
 
-
+# django
 db.sqlite3
+media/
+
+# python cache
 __pycache__/
-*.pycdb.sqlite3
+*.pyc
+
+# deploy
+deploy.sh

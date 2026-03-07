@@ -97,7 +97,7 @@ class MahsulotAdmin(admin.ModelAdmin):
 # 🏷 Etiketka set
 @admin.register(TasdiqlovchiSet)
 class TasdiqlovchiSetAdmin(admin.ModelAdmin):
-    list_display = ("id", "mahsulot", "soni", "yaratilgan_vaqti")
+    list_display = ("id", "soni", "yaratilgan_vaqti")
     actions = ["export_selected_to_excel"]
 
     def save_model(self, request, obj, form, change):
