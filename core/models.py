@@ -109,12 +109,6 @@ class TelegramFoydalanuvchi(models.Model):
 
 
 class TasdiqlovchiSet(models.Model):
-    mahsulot = models.ForeignKey(
-        Mahsulot,
-        on_delete=models.CASCADE,  # mahsulot majburiy bo‘lsin
-        verbose_name="Mahsulot "
-    )
-
     soni = models.IntegerField("Etiketka soni")
     yaratilgan_vaqti = models.DateTimeField(auto_now_add=True)
 
