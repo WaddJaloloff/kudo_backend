@@ -12,3 +12,26 @@ __pycache__/
 
 # deploy
 deploy.sh
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.env
+
+# Database
+*.sqlite3
+
+# Logs
+*.log
+
+# Django
+staticfiles/
+media/
+
+# IDE
+.vscode/
+.idea/
