@@ -1,0 +1,25 @@
+name: Deploy to kudo.uz
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 161.97.93.221
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /root/kudo/kudo_backend
+            git pull origin main
+            pip install -r requirements.txt --break-system-packages -q
+            python3 manage.py collectstatic --noinput -v 0
+            python3 manage.py migrate --noinput
+            sudo systemctl restart kudo
+            sudo systemctl restart kudo_bot
+            echo "✓ Deploy OK - $(date)"
