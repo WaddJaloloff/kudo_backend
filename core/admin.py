@@ -1,21 +1,24 @@
 from django.contrib import admin
 from django.utils.html import format_html
 from django.http import HttpResponse
-from openpyxl import Workbook
+try:
+    from openpyxl import Workbook
+    OPENPYXL_AVAILABLE = True
+except ImportError:
+    OPENPYXL_AVAILABLE = False
+
 from .models import (
     Avtomobil,
     MahsulotKategoriya,
     Mahsulot,
     MahsulotRasmi,
     MahsulotXususiyati,
-    TasdiqlovchiSet,
-    TasdiqlovchiKod,
-    TelegramFoydalanuvchi,
+    Buyurtma,
+    BuyurtmaMahsuloti,
 )
-import random
 
 
-# 🚗 Avtomobil admin (oldingi Kategoriya)
+# 🚗 Avtomobil admin
 @admin.register(Avtomobil)
 class AvtomobilAdmin(admin.ModelAdmin):
     list_display = ('id', 'nomi', 'slug')
@@ -50,32 +53,20 @@ class MahsulotAdmin(admin.ModelAdmin):
         extra_context = extra_context or {}
         extra_context['title'] = "Yangi mahsulot"
         return super().add_view(request, form_url, extra_context)
-    
+
     list_display = (
         'id',
         'nomi',
         'mahsulot_kategoriyasi',
         'get_avtomobillar',
-        'yaratilgan_vaqti',
-        'rasm_preview'
+        'rasm_preview',
     )
-
     search_fields = ('nomi', 'tavsifi')
     list_filter = ('mahsulot_kategoriyasi', 'avtomobillar')
-
-    inlines = [
-        MahsulotRasmiInline,
-        MahsulotXususiyatiInline
-    ]
-
+    inlines = [MahsulotRasmiInline, MahsulotXususiyatiInline]
     fieldsets = (
         ("Asosiy ma'lumotlar", {
-            'fields': (
-                'nomi',
-                'mahsulot_kategoriyasi',
-                'avtomobillar',
-                'tavsifi'
-            )
+            'fields': ('nomi', 'mahsulot_kategoriyasi', 'avtomobillar', 'tavsifi')
         }),
     )
 
@@ -94,47 +85,55 @@ class MahsulotAdmin(admin.ModelAdmin):
     rasm_preview.short_description = "Rasm"
 
 
-# 🏷 Etiketka set
-@admin.register(TasdiqlovchiSet)
-class TasdiqlovchiSetAdmin(admin.ModelAdmin):
-    list_display = ("id", "soni", "yaratilgan_vaqti")
-    actions = ["export_selected_to_excel"]
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if not change:
-            for _ in range(obj.soni):
-                TasdiqlovchiKod.objects.create(
-                    tasdiqlovchi_set=obj,
-                    code=str(random.randint(100000, 999999))
-                )
-
-    def export_selected_to_excel(self, request, queryset):
-        wb = Workbook()
-        ws = wb.active
-        ws.append(["ID", "CODE"])
-
-        for s in queryset:
-            for kod in s.kodlar.all():
-                ws.append([kod.id, kod.code])
-
-        response = HttpResponse(
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        response['Content-Disposition'] = 'attachment; filename="kodlar.xlsx"'
-        wb.save(response)
-        return response
-
-    export_selected_to_excel.short_description = "Excel yuklab olish"
+# 📋 Buyurtma mahsulotlari inline
+class BuyurtmaMahsulotiInline(admin.TabularInline):
+    model = BuyurtmaMahsuloti
+    extra = 0
+    readonly_fields = ['mahsulot_id', 'nomi', 'soni', 'mashina_turi']
 
 
-# 👤 Telegram foydalanuvchi
-@admin.register(TelegramFoydalanuvchi)
-class TelegramFoydalanuvchiAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "telegram_id",
-        "telegram_username",
-        "telefon_raqam",
-        "yaratilgan_vaqti"
-    )
+# 🛒 Buyurtma admin
+@admin.register(Buyurtma)
+class BuyurtmaAdmin(admin.ModelAdmin):
+    list_display = ['id', 'ism', 'telefon', 'harita_link', 'yaratilgan_vaqti']
+    list_filter = []
+    search_fields = ['ism', 'telefon']
+    inlines = [BuyurtmaMahsulotiInline]
+    readonly_fields = ['yaratilgan_vaqti', 'latitude', 'longitude', 'harita_link']
+    list_per_page = 25
+
+    def harita_link(self, obj):
+        if obj.latitude and obj.longitude:
+            lat, lng = obj.latitude, obj.longitude
+            google  = f"https://www.google.com/maps?q={lat},{lng}"
+            yandex  = f"https://yandex.uz/maps/?pt={lng},{lat}&z=17&l=map"
+            two_gis = f"https://2gis.uz/geo/{lng},{lat}"
+            copy_js = (
+                f"navigator.clipboard.writeText('{yandex}').then(function(){{"
+                f"this.textContent='✅ Nusxa olindi!';setTimeout(()=>this.textContent='📋 Yandex link',2000)"
+                f"}}.bind(this),function(){{prompt('Nusxa oling:','{yandex}')}});"
+            )
+            return format_html(
+                '<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">'
+                '<a href="{}" target="_blank" '
+                'style="display:inline-block;padding:4px 10px;border-radius:5px;'
+                'background:#4285F4;color:#fff;font-size:12px;font-weight:500;text-decoration:none;">'
+                '🗺 Google Maps</a>'
+                '<a href="{}" target="_blank" '
+                'style="display:inline-block;padding:4px 10px;border-radius:5px;'
+                'background:#FF3333;color:#fff;font-size:12px;font-weight:500;text-decoration:none;">'
+                '🗺 Yandex Maps</a>'
+                '<a href="{}" target="_blank" '
+                'style="display:inline-block;padding:4px 10px;border-radius:5px;'
+                'background:#00C347;color:#fff;font-size:12px;font-weight:500;text-decoration:none;">'
+                '🗺 2GIS</a>'
+                '<button onclick="{}" '
+                'style="display:inline-block;padding:4px 10px;border-radius:5px;'
+                'background:#8B5CF6;color:#fff;font-size:12px;font-weight:500;border:none;cursor:pointer;">'
+                '📋 Yandex link</button>'
+                '</div>',
+                google, yandex, two_gis, copy_js,
+            )
+        return "—"
+    harita_link.short_description = "Xarita"
+    harita_link.allow_tags = True

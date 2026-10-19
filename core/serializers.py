@@ -68,3 +68,44 @@ class MahsulotKategoriyaSerializer(serializers.ModelSerializer):
     class Meta:
         model = MahsulotKategoriya
         fields = ["id", "nomi", "slug"]
+
+from .models import Buyurtma, BuyurtmaMahsuloti
+
+
+class BuyurtmaMahsulotiSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    nomi = serializers.CharField()
+    soni = serializers.IntegerField(min_value=1)
+    mashina_turi = serializers.CharField(allow_blank=True, default='')
+
+
+class BuyurtmaCreateSerializer(serializers.ModelSerializer):
+    mahsulotlar = BuyurtmaMahsulotiSerializer(many=True, write_only=True)
+
+    class Meta:
+        model = Buyurtma
+        fields = ['ism', 'telefon', 'izoh', 'manzil', 'latitude', 'longitude', 'mahsulotlar']
+
+    def create(self, validated_data):
+        mahsulotlar_data = validated_data.pop('mahsulotlar', [])
+        buyurtma = Buyurtma.objects.create(**validated_data)
+        for item in mahsulotlar_data:
+            BuyurtmaMahsuloti.objects.create(
+                buyurtma=buyurtma,
+                mahsulot_id=item['id'],
+                nomi=item['nomi'],
+                soni=item['soni'],
+                mashina_turi=item.get('mashina_turi', '')
+            )
+        return buyurtma
+
+
+class BuyurtmaListSerializer(serializers.ModelSerializer):
+    mahsulotlar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Buyurtma
+        fields = '__all__'
+
+    def get_mahsulotlar(self, obj):
+        return BuyurtmaMahsulotiSerializer(obj.mahsulotlar.all(), many=True).data

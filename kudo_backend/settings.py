@@ -1,4 +1,7 @@
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -129,3 +132,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ── Telegram bot & site URL ───────────────────────────────────────────────
+import os
+BOT_TOKEN         = os.getenv("BOT_TOKEN", "")
+TELEGRAM_CHAT_ID  = os.getenv("TELEGRAM_CHAT_ID", "")
+SITE_URL          = os.getenv("SITE_URL", "http://localhost:8000")
