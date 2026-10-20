@@ -3,6 +3,8 @@ import logging
 import requests as http_requests
 
 from rest_framework import viewsets, status
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from .models import Mahsulot, Avtomobil, MahsulotKategoriya, Buyurtma
 from .serializers import (
@@ -68,6 +70,8 @@ class MahsulotKategoriyaViewSet(viewsets.ModelViewSet):
 class BuyurtmaViewSet(viewsets.ModelViewSet):
     queryset = Buyurtma.objects.all()
     serializer_class = BuyurtmaSerializer
+    authentication_classes = []  # CSRF yoq - ommaviy endpoint
+    permission_classes = [AllowAny]
     http_method_names = ["get", "post", "head", "options"]  # PUT/DELETE yoq
 
     def create(self, request, *args, **kwargs):
