@@ -31,16 +31,14 @@ class MahsulotKategoriya(models.Model):
 
 class Mahsulot(models.Model):
 
-    # ❗ MAJBURIY: mahsulot turi (amortizator, moy...)
     mahsulot_kategoriyasi = models.ForeignKey(
         MahsulotKategoriya,
         on_delete=models.PROTECT,
         verbose_name="Kategoriyasi ",
-        null=True,    # vaqtincha
+        null=True,
         blank=True
     )
 
-    # ❗ KO‘P avtomobilga mos
     avtomobillar = models.ManyToManyField(
         Avtomobil,
         related_name="mahsulotlar",
@@ -67,7 +65,7 @@ class MahsulotRasmi(models.Model):
     )
 
     rasm = models.ImageField("Rasm", upload_to="products/")
-    asosiy = models.BooleanField(default=False)  # optional (asosiy rasm belgilash uchun)
+    asosiy = models.BooleanField(default=False)
     yuklangan_vaqti = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -144,3 +142,32 @@ class TasdiqlovchiKod(models.Model):
     class Meta:
         verbose_name = "Etiketka kod "
         verbose_name_plural = "Etiketka kodlari "
+
+
+class Buyurtma(models.Model):
+    """Mijozdan kelgan buyurtma"""
+
+    HOLAT_CHOICES = [
+        ("yangi", "Yangi"),
+        ("qabul_qilindi", "Qabul qilindi"),
+        ("yetkazildi", "Yetkazildi"),
+        ("bekor_qilindi", "Bekor qilindi"),
+    ]
+
+    ism = models.CharField("Ismi", max_length=200)
+    telefon = models.CharField("Telefon raqami", max_length=20)
+    izoh = models.TextField("Izoh", blank=True, default="")
+    latitude = models.FloatField("Latitude", null=True, blank=True)
+    longitude = models.FloatField("Longitude", null=True, blank=True)
+    manzil = models.TextField("Manzil", blank=True, default="")
+    mahsulotlar = models.JSONField("Mahsulotlar (JSON)", default=list)
+    holat = models.CharField("Holat", max_length=30, choices=HOLAT_CHOICES, default="yangi")
+    yaratilgan_vaqti = models.DateTimeField("Yaratilgan vaqti", auto_now_add=True)
+
+    def __str__(self):
+        return f"#{self.id} — {self.ism} ({self.telefon})"
+
+    class Meta:
+        verbose_name = "Buyurtma"
+        verbose_name_plural = "Buyurtmalar"
+        ordering = ["-yaratilgan_vaqti"]

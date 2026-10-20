@@ -4,7 +4,8 @@ from .models import (
     MahsulotXususiyati,
     MahsulotRasmi,
     Avtomobil,
-    MahsulotKategoriya
+    MahsulotKategoriya,
+    Buyurtma,
 )
 
 
@@ -57,7 +58,7 @@ class MahsulotSerializer(serializers.ModelSerializer):
     def get_kategoriyalar(self, obj):
         # catalog filter uchun faqat mahsulot kategoriyasi
         return [str(obj.mahsulot_kategoriyasi)]
-    
+
 class AvtomobilSerializer(serializers.ModelSerializer):
     class Meta:
         model = Avtomobil
@@ -68,3 +69,21 @@ class MahsulotKategoriyaSerializer(serializers.ModelSerializer):
     class Meta:
         model = MahsulotKategoriya
         fields = ["id", "nomi", "slug"]
+
+
+class BuyurtmaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Buyurtma
+        fields = [
+            "id",
+            "ism",
+            "telefon",
+            "izoh",
+            "latitude",
+            "longitude",
+            "manzil",
+            "mahsulotlar",
+            "holat",
+            "yaratilgan_vaqti",
+        ]
+        read_only_fields = ["id", "holat", "yaratilgan_vaqti"]

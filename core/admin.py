@@ -11,6 +11,7 @@ from .models import (
     TasdiqlovchiSet,
     TasdiqlovchiKod,
     TelegramFoydalanuvchi,
+    Buyurtma,
 )
 import random
 
@@ -138,3 +139,12 @@ class TelegramFoydalanuvchiAdmin(admin.ModelAdmin):
         "telefon_raqam",
         "yaratilgan_vaqti"
     )
+
+# 🛒 Buyurtmalar
+@admin.register(Buyurtma)
+class BuyurtmaAdmin(admin.ModelAdmin):
+    list_display = ("id", "ism", "telefon", "holat", "yaratilgan_vaqti")
+    list_filter = ("holat",)
+    search_fields = ("ism", "telefon", "manzil")
+    readonly_fields = ("yaratilgan_vaqti", "mahsulotlar", "latitude", "longitude", "manzil")
+    list_editable = ("holat",)
