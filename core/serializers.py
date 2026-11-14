@@ -50,14 +50,18 @@ class MahsulotSerializer(serializers.ModelSerializer):
 
     def get_asosiy_rasm(self, obj):
         rasm = obj.rasmlar.filter(asosiy=True).first() or obj.rasmlar.first()
-        if rasm:
+        if rasm and rasm.rasm:
             request = self.context.get("request")
-            return request.build_absolute_uri(rasm.rasm.url)
+            if request:
+                return request.build_absolute_uri(rasm.rasm.url)
+            return rasm.rasm.url
         return None
 
     def get_kategoriyalar(self, obj):
         # catalog filter uchun faqat mahsulot kategoriyasi
-        return [str(obj.mahsulot_kategoriyasi)]
+        if obj.mahsulot_kategoriyasi:
+            return [str(obj.mahsulot_kategoriyasi)]
+        return []
 
 class AvtomobilSerializer(serializers.ModelSerializer):
     class Meta:
